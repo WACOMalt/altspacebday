@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<title>AltspaceBDay</title>
+<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
+<script src="https://sdk.altvr.com/libs/altspace.js/2.4.0/altspace.min.js"></script>
+<script src="https://cdn.rawgit.com/Ooblik/AltVRNC/master/dist/AltVRNC.min.js"></script>
+<script src="https://cdn.rawgit.com/norybiak/UltimateLoader/master/dist/UltimateLoader.min.js"></script>
+</head>
+<body>
+    <script>
+		
+		var scene = new THREE.Scene();
+				
+		if (!window.altspace || !window.altspace.inClient) document.write('<h3>Bruh, This is an AltspaceVR app. Why you trying to open it in a browser? Get altspace here: <a href="http://altvr.com"> AltspaceVR </a></h3>');
+
+		var AltspaceBDay = (function() {
+			
+			var renderer = altspace.getThreeJSRenderer({initialSerializationBufferSize: 9100000});
+			
+			var loadedObjects = [];
+			var modelBaseUrl = 'assets/';
+			
+			var ceilingBox;
+			var ceilingBox2;
+			
+			var config = { modelScaleFactor: 1 };
+			var models =
+
+			[
+				{ name: 'altspacebday', type: '.obj', position: { x: 0, y: 0, z: 0}, offset: { x: 0, y: 0, z: 0 } },
+				{ name: 'table', type: '.obj', position: { x: 0, y: 0, z: 0}, offset: { x: 0, y: 0, z: 0 } }
+			];
+
+			function onLoaded() {
+				var modelRoot = new THREE.Group();
+				modelRoot.position.set(0, 0, 0);
+				scene.add(modelRoot);
+                for (var i = 0; i < models.length; i++)
+				{
+                    var obj = models[i].object;
+                    var name = models[i].name;
+                    var spawnPosition = new THREE.Vector3();
+
+                    spawnPosition.copy(models[i].position);
+                    obj.position.copy(spawnPosition);//initial position
+                    modelRoot.add(obj);
+                }
+            }
+
+			function start() {
+				var promises =
+				[
+					altspace.getEnclosure()
+				];
+
+				//Stuff to run AFTER promises have been loaded
+				Promise.all(promises).then(function (array)
+				{
+					//Store enclosure and skeleton promises to variables
+					enclosure = array.shift();
+
+					ceilingBox = new THREE.Mesh(new THREE.BoxGeometry(ceilingBlockScale.x, 0.405, ceilingBlockScale.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 }));
+					ceilingBox.position.x = ceilingBlockCenter.x;
+					ceilingBox.position.y = ceilingBlockCenter.y;
+					ceilingBox.position.z = ceilingBlockCenter.z;
+					scene.add(ceilingBox);
+
+					var ceilingBlock = new NativeComponent('n-box-collider', null, ceilingBox).addTo(scene);
+
+										
+					// Build ultimateloader array
+					var objectUrls = new Array(models.length);
+					for (var i = 0; i < models.length; i++)
+					{
+						objectUrls[i] = modelBaseUrl + models[i].name + models[i].type;
+					}
+
+					// Use UltimateLoader to load my models
+					UltimateLoader.multiload(objectUrls, function(objects)
+					{
+						for (var i = 0; i < objects.length; i++)
+						{
+							models[i].object = objects[i];
+						}
+
+						onLoaded();
+					});
+					
+					renderer.render(scene);	
+				})
+
+			}
+			return { start: start };
+		}());
+
+		altspace.getEnclosure().then(function (enclosure) {
+			enclosure.requestFullspace().then(function () {
+			    AltspaceBDay.start();
+			});
+		})
+ 
+    </script>
+</body>
+</html>
