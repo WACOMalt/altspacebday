@@ -36,9 +36,6 @@
 			];
 
 			function onLoaded() {
-				var modelRoot = new THREE.Group();
-				modelRoot.position.set(0, 0, 0);
-				scene.add(modelRoot);
                 for (var i = 0; i < models.length; i++)
 				{
                     var obj = models[i].object;
@@ -47,8 +44,9 @@
 
                     spawnPosition.copy(models[i].position);
                     obj.position.copy(spawnPosition);//initial position
-                    modelRoot.add(obj);
+                    scene.add(obj);
                 }
+				renderer.render(scene);
             }
 
 			function start() {
@@ -88,9 +86,7 @@
 						}
 
 						onLoaded();
-					});
-					
-					renderer.render(scene);	
+					});	
 				})
 
 			}
