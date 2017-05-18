@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib table.mtl
+mtllib table2.mtl
 g default
 v -1.976932 1.021882 -5.348997
 v -1.976932 1.024503 -5.348997
